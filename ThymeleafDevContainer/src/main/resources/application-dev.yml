@@ -1,0 +1,25 @@
+# 開発環境設定
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/appdb
+    username: appuser
+    password: ${DB_PASSWORD:devpassword}
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# エラーページ設定（開発環境）
+server:
+  error:
+    include-stacktrace: always
+    include-exception: true
+
+# ログ設定
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>エラー - Spring Boot + Thymeleaf</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .error-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 50px 40px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        .error-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .error-code {
+            font-size: 72px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        .error-message {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .error-description {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .error-details {
+            background-color: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+            border-radius: 5px;
+        }
+        .error-details h3 {
+            margin-top: 0;
+            color: #e74c3c;
+        }
+        .error-details p {
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .error-details details {
+            margin-top: 15px;
+        }
+        .error-details summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        .error-details summary:hover {
+            background-color: #fee;
+        }
+        .error-details pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .error-type-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <div class="error-code" th:text="${status} ?: '500'">500</div>
+        <div class="error-type-badge" th:text="${error} ?: 'エラー'">エラー</div>
+        <div class="error-message">エラーが発生しました</div>
+        
+        <div class="error-description" th:if="${message}" th:text="${message}">
+            エラーの詳細メッセージ
+        </div>
+        
+        <!-- 開発環境でのみ詳細情報を表示 -->
+        <div th:if="${trace}" class="error-details">
+            <h3>🔍 エラー詳細（開発環境のみ表示）</h3>
+            <p><strong>タイムスタンプ:</strong> <span th:text="${timestamp}">2024-01-01 00:00:00</span></p>
+            <p><strong>リクエストパス:</strong> <span th:text="${path}">リクエストパス</span></p>
+            <details>
+                <summary>📋 スタックトレースを表示</summary>
+                <pre th:text="${trace}">スタックトレース</pre>
+            </details>
+        </div>
+        
+        <!-- 本番環境用のシンプルなメッセージ -->
+        <div th:unless="${trace}" class="error-description">
+            <p>申し訳ございません。予期しないエラーが発生しました。</p>
+            <p>しばらく時間をおいてから再度お試しください。</p>
+            <p>問題が解決しない場合は、システム管理者にお問い合わせください。</p>
+        </div>
+        
+        <a href="/" class="back-link">🏠 ホームに戻る</a>
+    </div>
+</body>
+</html>

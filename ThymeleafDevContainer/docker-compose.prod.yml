@@ -1,0 +1,33 @@
+# 本番環境用のDocker Compose設定
+# 使用方法: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # アプリケーションコンテナ（本番環境）
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring-boot-app-prod
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      # 本番環境では環境変数またはSecrets Managerから取得
+      - DATABASE_URL=${DATABASE_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - app-network
+    restart: always
+    # ヘルスチェック
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# ネットワーク定義
+networks:
+  app-network:
+    driver: bridge

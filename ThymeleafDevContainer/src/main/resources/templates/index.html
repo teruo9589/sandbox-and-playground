@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot + Thymeleaf サンプルアプリケーション</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Spring Boot + Thymeleaf 開発環境</h1>
+            <p class="subtitle">Docker環境で動作するサンプルアプリケーション</p>
+        </header>
+
+        <main>
+            <section class="welcome">
+                <h2>ようこそ</h2>
+                <p>このページは、Thymeleafテンプレートエンジンを使用してレンダリングされています。</p>
+            </section>
+
+            <section class="data-section">
+                <h2>データベースからのデータ</h2>
+                <div th:if="${samples != null and !samples.isEmpty()}">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>名前</th>
+                                <th>作成日時</th>
+                                <th>更新日時</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="sample : ${samples}">
+                                <td th:text="${sample.id}">1</td>
+                                <td th:text="${sample.name}">サンプル名</td>
+                                <td th:text="${#temporals.format(sample.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 00:00:00</td>
+                                <td th:text="${#temporals.format(sample.updatedAt, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 00:00:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${samples == null or samples.isEmpty()}" class="no-data">
+                    <p>データがありません。</p>
+                </div>
+            </section>
+
+            <section class="info">
+                <h2>環境情報</h2>
+                <ul>
+                    <li><strong>アクティブプロファイル:</strong> <span th:text="${activeProfile}">dev</span></li>
+                    <li><strong>アプリケーション名:</strong> <span th:text="${applicationName}">spring-boot-thymeleaf-app</span></li>
+                    <li><strong>現在時刻:</strong> <span th:text="${#temporals.format(currentTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 00:00:00</span></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Spring Boot + Thymeleaf サンプルアプリケーション</p>
+        </footer>
+    </div>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

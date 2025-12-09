@@ -1,0 +1,59 @@
+services:
+  # アプリケーションコンテナ
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: spring-boot-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_PASSWORD=devpassword
+    volumes:
+      # ソースコードのホットリロード用
+      - ./src:/app/src
+      # Gradleキャッシュの永続化
+      - gradle-cache:/home/gradle/.gradle
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # データベースコンテナ
+  postgres:
+    image: postgres:16
+    container_name: postgres-db
+    environment:
+      - POSTGRES_DB=appdb
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=devpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      # データの永続化
+      - postgres-data:/var/lib/postgresql/data
+      # 初期化スクリプト
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+# ボリューム定義
+volumes:
+  postgres-data:
+    driver: local
+  gradle-cache:
+    driver: local
+
+# ネットワーク定義
+networks:
+  app-network:
+    driver: bridge

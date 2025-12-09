@@ -1,0 +1,22 @@
+# 本番環境設定
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  thymeleaf:
+    cache: true
+  jpa:
+    show-sql: false
+
+# エラーページ設定（本番環境）
+server:
+  error:
+    include-stacktrace: never
+    include-exception: false
+
+# ログ設定
+logging:
+  level:
+    root: WARN
+    com.example: INFO

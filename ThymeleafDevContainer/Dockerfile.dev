@@ -1,0 +1,20 @@
+# 開発環境用Dockerfile
+FROM gradle:8.5-jdk21
+
+WORKDIR /app
+
+# Gradleの依存関係をキャッシュするため、まずビルドファイルをコピー
+COPY build.gradle settings.gradle ./
+COPY gradle gradle
+
+# 依存関係をダウンロード（キャッシュ層として機能）
+RUN gradle dependencies --no-daemon || true
+
+# ソースコードをコピー
+COPY src src
+
+# ポート8080を公開
+EXPOSE 8080
+
+# 開発環境ではbootRunを使用してアプリケーションを起動
+CMD ["gradle", "bootRun", "--no-daemon"]
