@@ -1,0 +1,25 @@
+# テスト環境設定
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+  thymeleaf:
+    cache: false
+
+# Actuator設定（テスト環境）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# ログ設定
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG

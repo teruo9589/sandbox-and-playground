@@ -9,6 +9,30 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  # DevTools設定（ホットリロード機能）
+  devtools:
+    restart:
+      enabled: true
+      # 再起動をトリガーするディレクトリ
+      additional-paths: src/main
+      # 除外するパターン
+      exclude: static/**,public/**
+      # ポーリング間隔（ミリ秒）- Dockerコンテナでのファイル変更検出を改善
+      poll-interval: 2000
+      quiet-period: 1000
+    livereload:
+      enabled: true
+      port: 35729
+
+# Actuator設定（開発環境）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 # エラーページ設定（開発環境）
 server:

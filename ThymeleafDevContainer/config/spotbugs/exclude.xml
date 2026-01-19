@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- 
+        SpotBugs除外ルール設定
+        Spring Boot Thymeleaf開発環境用の除外設定
+    -->
+
+    <!-- Spring Boot自動生成クラスの除外 -->
+    <Match>
+        <Class name="~.*\.Application"/>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
+
+    <!-- エンティティクラスの除外 -->
+    <Match>
+        <Class name="~.*\.entity\..*"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- 設定クラスの除外 -->
+    <Match>
+        <Class name="~.*\.config\..*"/>
+        <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+    </Match>
+
+    <!-- テストクラスの除外 -->
+    <Match>
+        <Class name="~.*Test"/>
+        <Bug pattern="DM_EXIT"/>
+        <Bug pattern="DM_GC"/>
+    </Match>
+    <Match>
+        <Class name="~.*Tests"/>
+        <Bug pattern="DM_EXIT"/>
+        <Bug pattern="DM_GC"/>
+    </Match>
+
+    <!-- Lombokによる自動生成メソッドの除外 -->
+    <Match>
+        <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
+        <Method name="equals"/>
+    </Match>
+    <Match>
+        <Bug pattern="HE_EQUALS_NO_HASHCODE"/>
+        <Method name="hashCode"/>
+    </Match>
+
+    <!-- Spring Bootの依存性注入に関する警告の除外 -->
+    <Match>
+        <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+        <Field name="~.*Repository"/>
+    </Match>
+    <Match>
+        <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+        <Field name="~.*Service"/>
+    </Match>
+
+    <!-- Thymeleafテンプレート関連の除外 -->
+    <Match>
+        <Class name="~.*Controller"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
+
+    <!-- データベース関連の除外 -->
+    <Match>
+        <Class name="~.*Repository"/>
+        <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"/>
+    </Match>
+
+    <!-- ログ出力関連の除外 -->
+    <Match>
+        <Bug pattern="SLF4J_FORMAT_SHOULD_BE_CONST"/>
+    </Match>
+
+    <!-- 例外処理関連の除外 -->
+    <Match>
+        <Class name="~.*\.exception\..*"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+
+    <!-- Spring Boot DevToolsの除外 -->
+    <Match>
+        <Package name="~org\.springframework\.boot\.devtools\..*"/>
+    </Match>
+
+    <!-- 自動生成されたコードの除外 -->
+    <Match>
+        <Source name="~.*generated.*"/>
+    </Match>
+</FindBugsFilter>

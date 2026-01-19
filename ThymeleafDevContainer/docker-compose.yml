@@ -7,6 +7,7 @@ services:
     container_name: spring-boot-app
     ports:
       - "8080:8080"
+      - "35729:35729"  # DevTools LiveReloadポート
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - DB_PASSWORD=devpassword

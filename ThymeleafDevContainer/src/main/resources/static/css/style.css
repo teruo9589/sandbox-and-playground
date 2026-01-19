@@ -139,3 +139,14 @@ footer {
         padding: 8px;
     }
 }
+
+/* ホットリロード機能テスト用スタイル */
+.hot-reload-test {
+    background-color: #e8f5e8;
+    border: 2px solid #4caf50;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #2e7d32;
+}

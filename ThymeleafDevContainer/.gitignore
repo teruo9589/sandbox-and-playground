@@ -41,3 +41,30 @@ spring-boot-*.log
 # Docker
 docker-compose.override.yml
 .dockerignore.local
+
+# ビルド成果物とレポート
+build/
+.gradle/
+bin/
+out/
+
+# テストレポート（個人情報が含まれる可能性）
+**/build/reports/
+**/build/test-results/
+
+# ログファイル
+*.log
+logs/
+
+# 一時ファイル
+nul
+*.tmp
+*.bak
+
+# Gradle Wrapper（jarは含める）
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE固有の設定
+.kiro/
+.vscode/
+.idea/

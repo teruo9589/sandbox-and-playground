@@ -13,8 +13,10 @@ RUN gradle dependencies --no-daemon || true
 # ソースコードをコピー
 COPY src src
 
-# ポート8080を公開
+# ポート8080を公開（アプリケーション）
 EXPOSE 8080
+# ポート35729を公開（DevTools LiveReload）
+EXPOSE 35729
 
 # 開発環境ではbootRunを使用してアプリケーションを起動
 CMD ["gradle", "bootRun", "--no-daemon"]

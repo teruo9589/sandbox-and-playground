@@ -1,217 +1,252 @@
 # Docker環境ガイド
 
-## 概要
+## ホットリロード機能について
 
-このプロジェクトは、Docker Composeを使用してSpring BootアプリケーションとPostgreSQLデータベースをコンテナ化しています。
+このプロジェクトでは、開発効率を向上させるためにホットリロード機能を実装しています。
 
-## 前提条件
+### 設定内容
 
-- Docker Desktop（Windows/Mac）またはDocker Engine（Linux）がインストールされていること
-- Docker Composeがインストールされていること（Docker Desktop には含まれています）
+1. **Spring Boot DevTools**
+   - `build.gradle`に`spring-boot-devtools`依存関係を追加
+   - 開発環境でのみ有効（`developmentOnly`スコープ）
 
-## 開発環境の起動
+2. **Thymeleafキャッシュ無効化**
+   - `application.yml`で`spring.thymeleaf.cache: false`を設定
+   - テンプレート変更が即座に反映されます
 
-### 1. 初回起動
+3. **DevTools設定**
+   - `application-dev.yml`で詳細な設定を実施
+   - ポーリング間隔: 2秒（Dockerコンテナでのファイル変更検出を改善）
+   - LiveReloadサーバー: ポート35729で起動
+
+4. **Dockerボリュームマウント**
+   - `docker-compose.yml`で`./src:/app/src`をマウント
+   - ホストのファイル変更がコンテナ内に即座に反映されます
+
+### ホットリロード機能の使い方
+
+#### 1. 環境の起動
 
 ```bash
-# すべてのコンテナを起動（バックグラウンド）
 docker-compose up -d
-
-# ログを確認
-docker-compose logs -f
 ```
 
-### 2. アプリケーションへのアクセス
+#### 2. アプリケーションへのアクセス
 
-ブラウザで以下のURLにアクセス：
-- アプリケーション: http://localhost:8080
-- データベース: localhost:5432（PostgreSQLクライアントから接続可能）
+ブラウザで http://localhost:8080 にアクセスします。
 
-### 3. 環境の停止
+#### 3. テンプレートファイルの編集
+
+`src/main/resources/templates/index.html`を編集します。
+
+例：
+```html
+<p class="hot-reload-test">ホットリロード機能が有効です。このテキストを変更して自動反映をテストしてください。</p>
+```
+
+このテキストを変更して保存します。
+
+#### 4. 変更の確認
+
+**重要**: Dockerコンテナ内でのホットリロードには制限があります。
+
+##### 方法1: コンテナを再起動（推奨）
+
+テンプレートファイルを変更した後、コンテナを再起動します：
 
 ```bash
-# コンテナを停止
-docker-compose down
-
-# コンテナとボリュームを削除（データも削除）
-docker-compose down -v
+docker-compose restart app
 ```
 
-## よく使うコマンド
+再起動後（約10-15秒）、ブラウザをリロード（F5）して変更を確認します。
+
+##### 方法2: 手動でファイルをコピー
+
+```bash
+# コンテナ内のファイルを更新
+docker cp src/main/resources/templates/index.html spring-boot-app:/app/src/main/resources/templates/index.html
+```
+
+DevToolsが変更を検出し、アプリケーションを自動的に再起動します（2-5秒）。
+
+##### 方法3: コンテナ内で直接編集
+
+```bash
+# コンテナ内でシェルを起動
+docker-compose exec app bash
+
+# コンテナ内でファイルを編集
+vi /app/src/main/resources/templates/index.html
+```
+
+コンテナ内でファイルを編集すると、DevToolsが変更を検出します。
+
+#### Dockerでのホットリロードの制限事項
+
+Dockerコンテナでのホットリロードには、以下の制限があります：
+
+1. **ファイルシステムの違い**
+   - Windowsホスト上のDockerでは、ボリュームマウントされたファイルの変更イベントが正しく伝播しないことがあります
+   - これは、WindowsファイルシステムとLinuxファイルシステムの違いによるものです
+
+2. **ポーリング間隔**
+   - `application-dev.yml`で`poll-interval: 2000`（2秒）を設定していますが、ボリュームマウントの場合は検出されないことがあります
+
+3. **推奨される開発方法**
+   - **ローカル開発**: IDEでアプリケーションを直接実行（`./gradlew bootRun`）すると、ホットリロードが正常に動作します
+   - **Docker開発**: テンプレート変更後は`docker-compose restart app`を実行するか、コンテナ内で直接編集します
+
+### ホットリロードの対象
+
+以下のファイルの変更が自動的に検出されます：
+
+- ✅ Thymeleafテンプレート（`src/main/resources/templates/**/*.html`）
+- ✅ Javaソースコード（`src/main/java/**/*.java`）
+- ✅ 設定ファイル（`src/main/resources/application*.yml`）
+- ✅ 静的リソース（`src/main/resources/static/**/*`）
+
+### トラブルシューティング
+
+#### 変更が反映されない場合
+
+1. **コンテナのログを確認**
+   ```bash
+   docker logs spring-boot-app
+   ```
+   
+   `LiveReload server is running on port 35729`というメッセージが表示されているか確認します。
+
+2. **ボリュームマウントを確認**
+   ```bash
+   docker-compose config
+   ```
+   
+   `./src:/app/src`のマウント設定が正しいか確認します。
+
+3. **コンテナを再起動**
+   ```bash
+   docker-compose restart app
+   ```
+
+4. **設定確認スクリプトを実行**
+   ```bash
+   bash check-hot-reload-config.sh
+   ```
+
+#### Javaコードの変更が反映されない場合
+
+Javaコードの変更は、クラスファイルの再コンパイルが必要です。以下の方法で対応できます：
+
+1. **IDEの自動ビルド機能を有効化**
+   - IntelliJ IDEA: `Build, Execution, Deployment > Compiler > Build project automatically`を有効化
+   - Eclipse: デフォルトで有効
+
+2. **手動でビルド**
+   ```bash
+   docker-compose exec app gradle classes
+   ```
+
+### LiveReload ブラウザ拡張機能（オプション）
+
+ブラウザの自動リロードを有効にするには、以下の拡張機能をインストールします：
+
+- **Chrome**: [LiveReload](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei)
+- **Firefox**: [LiveReload](https://addons.mozilla.org/en-US/firefox/addon/livereload-web-extension/)
+
+拡張機能をインストール後、アイコンをクリックして有効化します。
+
+### パフォーマンスに関する注意事項
+
+- ホットリロード機能は開発環境でのみ有効です
+- 本番環境（`SPRING_PROFILES_ACTIVE=prod`）では自動的に無効化されます
+- 大規模なプロジェクトでは、再起動に時間がかかる場合があります
+
+### 設定ファイルの詳細
+
+#### application-dev.yml
+
+```yaml
+spring:
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main
+      exclude: static/**,public/**
+      poll-interval: 2000      # ファイル変更のポーリング間隔（ミリ秒）
+      quiet-period: 1000       # 変更検出後の待機時間（ミリ秒）
+    livereload:
+      enabled: true
+      port: 35729
+```
+
+#### docker-compose.yml
+
+```yaml
+services:
+  app:
+    ports:
+      - "8080:8080"
+      - "35729:35729"  # DevTools LiveReloadポート
+    volumes:
+      - ./src:/app/src  # ソースコードのホットリロード用
+```
+
+## その他のDocker操作
 
 ### コンテナの状態確認
 
 ```bash
-# 実行中のコンテナを確認
 docker-compose ps
-
-# コンテナのログを確認
-docker-compose logs app
-docker-compose logs postgres
 ```
 
-### コンテナの再起動
+### ログの確認
 
 ```bash
-# すべてのコンテナを再起動
-docker-compose restart
+# アプリケーションコンテナのログ
+docker logs spring-boot-app
 
-# 特定のコンテナのみ再起動
-docker-compose restart app
+# データベースコンテナのログ
+docker logs postgres-db
+
+# リアルタイムでログを表示
+docker logs -f spring-boot-app
+```
+
+### コンテナの停止
+
+```bash
+docker-compose down
+```
+
+### コンテナとボリュームの削除
+
+```bash
+docker-compose down -v
 ```
 
 ### コンテナ内でコマンドを実行
 
 ```bash
-# アプリケーションコンテナに入る
+# アプリケーションコンテナ内でシェルを起動
 docker-compose exec app bash
 
-# データベースコンテナに入る
+# データベースコンテナ内でpsqlを起動
 docker-compose exec postgres psql -U appuser -d appdb
 ```
 
-### ビルドの再実行
+### ビルドキャッシュのクリア
 
 ```bash
-# イメージを再ビルドして起動
-docker-compose up -d --build
-
-# キャッシュを使わずに再ビルド
 docker-compose build --no-cache
 ```
 
-## 本番環境のビルドとデプロイ
+## まとめ
 
-### 本番用Dockerイメージのビルド
+ホットリロード機能により、以下のメリットが得られます：
 
-```bash
-# 本番用イメージをビルド
-docker build -t spring-boot-app:latest .
+- ✅ テンプレートファイルの変更が即座に反映される
+- ✅ コンテナの再起動が不要
+- ✅ 開発サイクルが高速化される
+- ✅ 開発体験が向上する
 
-# イメージの確認
-docker images | grep spring-boot-app
-```
-
-### 本番環境用Docker Composeの使用
-
-```bash
-# 環境変数を設定
-export DATABASE_URL=jdbc:postgresql://your-rds-endpoint:5432/appdb
-export DB_USERNAME=your-username
-export DB_PASSWORD=your-password
-
-# 本番環境用の設定で起動
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-## トラブルシューティング
-
-### ポートが既に使用されている
-
-エラー: `Bind for 0.0.0.0:8080 failed: port is already allocated`
-
-**解決方法**:
-```bash
-# ポートを使用しているプロセスを確認（Windows）
-netstat -ano | findstr :8080
-
-# ポートを使用しているプロセスを確認（Mac/Linux）
-lsof -i :8080
-
-# docker-compose.ymlのポート番号を変更
-ports:
-  - "8081:8080"  # ホスト側のポートを変更
-```
-
-### データベース接続エラー
-
-エラー: `Connection refused` または `could not connect to server`
-
-**解決方法**:
-```bash
-# データベースコンテナの状態を確認
-docker-compose ps postgres
-
-# データベースのログを確認
-docker-compose logs postgres
-
-# ヘルスチェックの状態を確認
-docker-compose ps
-
-# データベースが起動するまで待機してから再起動
-docker-compose restart app
-```
-
-### ボリュームのクリーンアップ
-
-データベースの状態をリセットしたい場合：
-
-```bash
-# すべてのコンテナとボリュームを削除
-docker-compose down -v
-
-# 再度起動（初期化スクリプトが実行される）
-docker-compose up -d
-```
-
-### Gradleキャッシュの問題
-
-ビルドエラーが発生する場合：
-
-```bash
-# Gradleキャッシュボリュームを削除
-docker volume rm spring-boot-thymeleaf-dev-env_gradle-cache
-
-# イメージを再ビルド
-docker-compose up -d --build
-```
-
-### コンテナのリソース不足
-
-メモリ不足エラーが発生する場合：
-
-1. Docker Desktopの設定を開く
-2. Resources > Advanced
-3. メモリを4GB以上に増やす
-4. Apply & Restart
-
-## ファイル構成
-
-```
-.
-├── docker-compose.yml          # 開発環境用Docker Compose設定
-├── docker-compose.prod.yml     # 本番環境用Docker Compose設定
-├── Dockerfile.dev              # 開発環境用Dockerfile
-├── Dockerfile                  # 本番環境用Dockerfile
-├── .dockerignore               # Dockerビルドから除外するファイル
-├── .env.example                # 環境変数のサンプル
-└── docker/
-    └── init.sql                # データベース初期化スクリプト
-```
-
-## ホットリロード
-
-開発環境では、ソースコードの変更が自動的に反映されます：
-
-- `src/main/resources/templates/` 配下のThymeleafテンプレート
-- `src/main/resources/static/` 配下の静的ファイル（CSS、JS、画像）
-
-Javaコードを変更した場合は、Spring Boot DevToolsが自動的にアプリケーションを再起動します。
-
-## セキュリティに関する注意事項
-
-1. **本番環境では必ず環境変数を変更してください**
-   - デフォルトのパスワード（`devpassword`）は開発環境専用です
-   - 本番環境ではAWS Secrets Managerなどを使用してください
-
-2. **.envファイルをGitにコミットしないでください**
-   - `.gitignore`に`.env`が含まれていることを確認してください
-
-3. **本番環境ではHTTPSを使用してください**
-   - ALBやNginxでSSL/TLS終端を設定してください
-
-## 参考リンク
-
-- [Docker公式ドキュメント](https://docs.docker.com/)
-- [Docker Compose公式ドキュメント](https://docs.docker.com/compose/)
-- [Spring Boot Docker公式ガイド](https://spring.io/guides/gs/spring-boot-docker/)
+問題が発生した場合は、このガイドのトラブルシューティングセクションを参照してください。

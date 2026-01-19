@@ -1,17 +1,13 @@
 package com.example.app.entity;
 
-import org.seasar.doma.Entity;
-import org.seasar.doma.Id;
-import org.seasar.doma.Table;
-import org.seasar.doma.jdbc.entity.NamingType;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
  * サンプルエンティティクラス
- * sample_tableテーブルに対応するDomaエンティティ
+ * sample_tableテーブルに対応するJPAエンティティ
  */
-@Entity(naming = NamingType.SNAKE_LOWER_CASE)
+@Entity
 @Table(name = "sample_table")
 public class SampleEntity {
     
@@ -19,21 +15,25 @@ public class SampleEntity {
      * ID（主キー）
      */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     /**
      * 名前
      */
+    @Column(name = "name")
     private String name;
     
     /**
      * 作成日時
      */
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
     
     /**
      * 更新日時
      */
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
     /**

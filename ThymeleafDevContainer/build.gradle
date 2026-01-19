@@ -30,11 +30,14 @@ dependencies {
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    
+    // 開発ツール（ホットリロード機能）
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     
     // データベース
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.postgresql:postgresql'
-    implementation 'org.seasar.doma.boot:doma-spring-boot-starter:1.7.0'
-    annotationProcessor 'org.seasar.doma:doma-processor:2.59.0'
     
     // Lombok
     compileOnly 'org.projectlombok:lombok'
@@ -58,6 +61,12 @@ checkstyle {
     ignoreFailures = false
 }
 
+configurations.checkstyle {
+    resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
+        select("com.google.guava:guava:0")
+    }
+}
+
 tasks.withType(Checkstyle) {
     reports {
         xml.required = true
@@ -77,13 +86,38 @@ jacocoTestReport {
         html.required = true
         csv.required = false
     }
+    finalizedBy jacocoTestCoverageVerification
 }
 
 jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
     violationRules {
         rule {
+            // 全体のカバレッジ基準
             limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
                 minimum = 0.70
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+        }
+        rule {
+            // クラス単位のカバレッジ基準
+            element = 'CLASS'
+            excludes = [
+                '*.Application',
+                '*.config.*',
+                '*.entity.*',
+                '*.exception.*'
+            ]
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
             }
         }
     }
@@ -93,6 +127,7 @@ jacocoTestCoverageVerification {
 spotbugs {
     toolVersion = '4.8.3'
     ignoreFailures = false
+    excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
 }
 
 tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
@@ -100,9 +135,11 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
         html {
             required = true
             outputLocation = file("$buildDir/reports/spotbugs/main.html")
+            stylesheet = 'fancy-hist.xsl'
         }
         xml {
-            required = false
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/main.xml")
         }
     }
 }
@@ -114,4 +151,16 @@ tasks.named('test') {
 
 tasks.named('build') {
     dependsOn jacocoTestCoverageVerification
+}
+
+// 品質チェックタスクの統合
+task qualityCheck {
+    description = '全ての品質管理ツールを実行します'
+    group = 'verification'
+    dependsOn 'checkstyleMain', 'checkstyleTest', 'spotbugsMain', 'jacocoTestCoverageVerification'
+}
+
+// ビルド前に品質チェックを実行
+tasks.named('build') {
+    dependsOn qualityCheck
 }

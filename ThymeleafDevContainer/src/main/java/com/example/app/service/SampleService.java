@@ -87,15 +87,11 @@ public class SampleService {
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
         
-        // データベースに挿入
-        int result = sampleRepository.insert(entity);
+        // データベースに保存
+        SampleEntity savedEntity = sampleRepository.save(entity);
         
-        if (result != 1) {
-            throw new RuntimeException("エンティティの作成に失敗しました");
-        }
-        
-        log.info("エンティティを作成しました: id={}", entity.getId());
-        return entity;
+        log.info("エンティティを作成しました: id={}", savedEntity.getId());
+        return savedEntity;
     }
     
     /**
@@ -122,15 +118,11 @@ public class SampleService {
         entity.setName(name.trim());
         entity.setUpdatedAt(LocalDateTime.now());
         
-        // データベースに更新
-        int result = sampleRepository.update(entity);
+        // データベースに保存
+        SampleEntity savedEntity = sampleRepository.save(entity);
         
-        if (result != 1) {
-            throw new RuntimeException("エンティティの更新に失敗しました");
-        }
-        
-        log.info("エンティティを更新しました: id={}", entity.getId());
-        return entity;
+        log.info("エンティティを更新しました: id={}", savedEntity.getId());
+        return savedEntity;
     }
     
     /**
@@ -147,11 +139,7 @@ public class SampleService {
             .orElseThrow(() -> new RuntimeException("エンティティが見つかりません: id=" + id));
         
         // データベースから削除
-        int result = sampleRepository.delete(entity);
-        
-        if (result != 1) {
-            throw new RuntimeException("エンティティの削除に失敗しました");
-        }
+        sampleRepository.delete(entity);
         
         log.info("エンティティを削除しました: id={}", id);
     }
