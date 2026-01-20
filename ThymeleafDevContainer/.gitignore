@@ -65,6 +65,11 @@ nul
 !gradle/wrapper/gradle-wrapper.jar
 
 # IDE固有の設定
-.kiro/
+#.kiro/
 .vscode/
 .idea/
+
+# DevContainer
+.devcontainer/.tmp/
+.devcontainer/.cache/
+.devcontainer/*.log

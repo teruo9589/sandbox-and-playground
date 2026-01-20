@@ -20,6 +20,9 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    testImplementation {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
 }
 
 repositories {
@@ -52,6 +55,17 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers:1.19.3'
     testImplementation 'org.testcontainers:postgresql:1.19.3'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    
+    // JSON処理（テスト用）
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    
+    // YAML処理（テスト用）
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    
+    // プロパティベーステスト（jqwik）
+    testImplementation 'net.jqwik:jqwik-api:1.8.2'
+    testImplementation 'net.jqwik:jqwik-spring:1.8.2'
+    testRuntimeOnly 'net.jqwik:jqwik-engine:1.8.2'
 }
 
 // CheckStyle設定

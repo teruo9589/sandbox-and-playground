@@ -1,0 +1,114 @@
+{
+  "name": "Spring Boot DevContainer",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/app",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Java開発用拡張機能
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-java-test",
+        "vscjava.vscode-maven",
+        "vscjava.vscode-gradle",
+        
+        // Spring Boot開発用拡張機能
+        "vmware.vscode-spring-boot",
+        "vscjava.vscode-spring-initializr",
+        "vscjava.vscode-spring-boot-dashboard",
+        
+        // フロントエンド開発用拡張機能（Thymeleaf/HTML/JavaScript）
+        "ecmel.vscode-html-css",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "formulahendry.auto-rename-tag",
+        "zignd.html-css-class-completion",
+        "xabikos.JavaScriptSnippets",
+        
+        // 開発者体験向上用拡張機能
+        "streetsidesoftware.code-spell-checker",
+        "usernamehw.errorlens",
+        "christian-kohler.path-intellisense",
+        
+        // Docker/コンテナ用拡張機能
+        "ms-azuretools.vscode-docker",
+        
+        // コード品質用拡張機能
+        "sonarsource.sonarlint-vscode",
+        "shengchen.vscode-checkstyle"
+      ],
+      
+      "settings": {
+        // Java言語サーバー設定
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.server.launchMode": "Standard",
+        "java.import.gradle.enabled": true,
+        "java.import.gradle.wrapper.enabled": true,
+        "java.autobuild.enabled": true,
+        "java.compile.nullAnalysis.mode": "automatic",
+        
+        // フォーマッター設定
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        },
+        
+        // 言語別フォーマッター設定
+        "[java]": {
+          "editor.defaultFormatter": "redhat.java",
+          "editor.tabSize": 4
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2
+        },
+        "[html]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2
+        },
+        "[css]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2
+        },
+        
+        // Prettier設定
+        "prettier.tabWidth": 2,
+        "prettier.useTabs": false,
+        "prettier.singleQuote": true,
+        "prettier.printWidth": 100,
+        
+        // Spring Boot設定
+        "spring-boot.ls.java.home": "/opt/java/openjdk",
+        "spring-boot.ls.checkjvm": false,
+        
+        // ターミナル設定
+        "terminal.integrated.defaultProfile.linux": "bash",
+        
+        // ファイル監視設定
+        "files.watcherExclude": {
+          "**/.gradle/**": true,
+          "**/build/**": true,
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true,
+          "**/node_modules/**": true
+        },
+        
+        // エディター設定
+        "editor.suggestSelection": "first",
+        "editor.minimap.enabled": true,
+        "editor.rulers": [100, 120],
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true
+      }
+    }
+  },
+  
+  "forwardPorts": [8080, 35729, 5432],
+  
+  "postCreateCommand": "gradle dependencies --no-daemon",
+  
+  "remoteUser": "gradle"
+}
