@@ -9,7 +9,7 @@
 | ドキュメントID | DOC-SCREEN-LIST |
 | 作成日 | YYYY-MM-DD |
 | 最終更新日 | YYYY-MM-DD |
-| バージョン | 1.0 |
+| バージョン | 1.0.0 |
 
 ---
 
